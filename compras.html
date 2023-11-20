@@ -344,7 +344,10 @@
 
 
     <script>
-        var linhaAtualEdit;
+           document.addEventListener('DOMContentLoaded', function () {
+            document.body.classList.add('loaded');
+            carregarMateriaisSalvos();
+        });
 
         function adicionarMaterial() {
             var materialInput = document.getElementById('material');
@@ -363,6 +366,9 @@
                 // Limpar os campos de entrada
                 materialInput.value = "";
                 quantidadeInput.value = "";
+
+                // Salvar no localStorage
+                salvarMateriaisNoLocalStorage();
             }
         }
 
@@ -376,6 +382,9 @@
         function excluirLinha(icon) {
             var row = icon.closest('tr');
             row.remove();
+
+            // Salvar no localStorage
+            salvarMateriaisNoLocalStorage();
         }
 
         function imprimir() {
@@ -396,8 +405,39 @@
 
             // Fechar o modal após a edição
             fecharModal();
+
+            // Salvar no localStorage
+            salvarMateriaisNoLocalStorage();
         }
 
+        function carregarMateriaisSalvos() {
+            var materiaisSalvos = JSON.parse(localStorage.getItem('materiais')) || [];
+
+            var tabelaMateriais = document.getElementById('tabelaMateriais');
+            tabelaMateriais.innerHTML = '';
+
+            materiaisSalvos.forEach(function (material) {
+                var newRow = tabelaMateriais.insertRow();
+                var linhaId = 'linha' + Date.now(); // Cria um identificador único para a linha
+                newRow.setAttribute('id', linhaId);
+                newRow.innerHTML = `<td>${material.nome}</td><td>${material.quantidade}</td><td><span class="icon"><i class="fas fa-edit" onclick="abrirModal('${linhaId}')"></i></span><span class="icon has-text-danger" onclick="excluirLinha(this)"><i class="fas fa-trash-alt"></i></span></td>`;
+            });
+        }
+
+        function salvarMateriaisNoLocalStorage() {
+            var tabelaMateriais = document.getElementById('tabelaMateriais');
+            var materiais = [];
+
+            for (var i = 0; i < tabelaMateriais.rows.length; i++) {
+                var material = {
+                    nome: tabelaMateriais.rows[i].cells[0].innerText,
+                    quantidade: tabelaMateriais.rows[i].cells[1].innerText
+                };
+                materiais.push(material);
+            }
+
+            localStorage.setItem('materiais', JSON.stringify(materiais));
+        }
     </script>
 
 </body>
